@@ -7,7 +7,7 @@ CLIENTS_INDEX = 0
 HANDLERS = {}
 
 
-class ChromecastEmulator(tornado.websocket.WebSocketHandler):
+class MessageHandler(tornado.websocket.WebSocketHandler):
 
     def initialize(self):
         self.namespace = {
@@ -150,32 +150,6 @@ class ChromecastEmulator(tornado.websocket.WebSocketHandler):
                 "autoplay": {
                   "autoplay": "on"
                 },
-                "beacon_data": {
-                  "c_computerguid": "e9835f80-e62f-37e3-a9a8-671678bafaf0",
-                  "c_device_fam": "Android",
-                  "c_device_man": "HTC",
-                  "c_device_model": "HTC6525LVW",
-                  "c_device_product": "Android REL5.0.1",
-                  "c_distro": "google",
-                  "c_distroplatform": "Phone",
-                  "c_os": "Android REL5.0.1",
-                  "c_player": "3.0.3.200000",
-                  "c_session": "ce597dfd-40f9-426d-b5c1-78d40ef79ebb",
-                  "c_type": "controller",
-                  "c_userid": "2000186782",
-                  "dup_play": False,
-                  "package_id": "0",
-                  "plan_id": "108004328",
-                  "profile_id": "2000186782",
-                  "sitesessionid": "394d5997-d31a-4bd7-a895-473dc2b1f1cd"
-                },
-                "caption_style_data": {
-                  "backgroundColor": -16776961,
-                  "edgeColor": -16777216,
-                  "edgeType": "DROP_SHADOW",
-                  "textColor": -256,
-                  "textSize": 1.5
-                },
                 "captions_language": "en",
                 "device_ad_id": "17abd158-1812-4d45-a9c5-941588176787",
                 "eab_id": entity['bundle']['eab_id'],
@@ -186,13 +160,7 @@ class ChromecastEmulator(tornado.websocket.WebSocketHandler):
                 "offset_msec": -1,
                 "show_prerolls": True,
                 "user_token": user_token,
-                "volume": 0.0
-              },
-              "event_type": "start",
-              "message_id": 1,
-              "version": "0.1",
-            "requestId": self.requestId,
-            "sessionId": "6e5468aa-950f-48b3-951f-84f163ec20f6"
+                "volume": 0
         }
         self.requestId += 1
         self.write_message({
@@ -208,7 +176,7 @@ class ChromecastEmulator(tornado.websocket.WebSocketHandler):
         :return:
         """
         status = self.get_app_status()
-
+        # open browser by selenium
         self.start_browser(self.url, status, None, {})
 
         self.set_app_status(status)
@@ -221,7 +189,7 @@ class ChromecastEmulator(tornado.websocket.WebSocketHandler):
     def on_close(self):
         pass
 
-
+# emulate websocket server like chromecast key
 class ChromecastRunThread(threading.Thread):
     """
     check all resource pool status and store in database
@@ -237,7 +205,6 @@ class ChromecastRunThread(threading.Thread):
 
     def stop(self):
         print 'to stop chromecast server....'
-
         self._stop.set()
 
     def stopped(self):
@@ -252,8 +219,8 @@ class ChromecastRunThread(threading.Thread):
         :return:
         """
         application = tornado.web.Application([
-            (r'/v2/ipc', ChromecastEmulator),
-            (r'/sender', ChromecastEmulator)
+            (r'/v2/ipc', MessageHandler),
+            (r'/sender', MessageHandler)
         ])
         application.listen(8008)
         tornado.ioloop.IOLoop.instance().start()
@@ -262,8 +229,8 @@ class ChromecastRunThread(threading.Thread):
 
 if __name__ == "__main__":
     application = tornado.web.Application([
-        (r'/v2/ipc', ChromecastEmulator),
-        (r'/sender', ChromecastEmulator)
+        (r'/v2/ipc', MessageHandler),
+        (r'/sender', MessageHandler)
     ])
     application.listen(8008)
     tornado.ioloop.IOLoop.instance().start()
