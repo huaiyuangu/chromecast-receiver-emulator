@@ -8,6 +8,7 @@
 
 ## expample
 ```
+    from ChromecastEmulator import MessageHandler
     application = tornado.web.Application([
         (r'/v2/ipc', MessageHandler),
         (r'/sender', MessageHandler)
